@@ -34,7 +34,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   // Form key
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-String customMobileNo = ''; // To store the last 3 digits
+  String customAddress = ''; // To store the last 3 digits of the address
 
   // Controllers for different fields
   final TextEditingController controller0 = TextEditingController(); // Customer ID
@@ -101,38 +101,39 @@ String customMobileNo = ''; // To store the last 3 digits
 
   /// Fetch customer details from API
   Future<void> fetchCustomerDetails() async {
-  try {
-    final customerId = controller0.text.trim();
-    // Show loading dialog
+    try {
+      final customerId = controller0.text.trim();
+      // Show loading dialog
 
-    // Fetch customer data
-    final response = await openSession(customerId)
-        .timeout(Duration(seconds: 10), onTimeout: () {
-      throw Exception('Request timed out');
-    });
-
-    if (response['status'] == 1) {
-      final userDetails = response['userDetails'];
-      await dataFromUser.StorageHelper.saveUserDetails(userDetails);
-
-      // Extract the last 3 digits of the mobile number
-      String mobileNo = userDetails['mobileNo'];
-      String last3Digits = mobileNo.substring(mobileNo.length - 3);
-
-      setState(() {
-        // Set the last 3 digits as CustomText
-        loginPage = 1;  // Show next page
-        controller1.text = '';  // Clear mobile field so it's not editable
-        customMobileNo = last3Digits;  // Store the last 3 digits for display
+      // Fetch customer data
+      final response = await openSession(customerId)
+          .timeout(Duration(seconds: 10), onTimeout: () {
+        throw Exception('Request timed out');
       });
-    } else {
-      CustomSnackBar.warning(message: "Customer ID not found");
-    }
-  } catch (e) {
-    CustomSnackBar.error(message: e.toString());
-  }
-}
 
+      if (response['status'] == 1) {
+        final userDetails = response['userDetails'];
+        await dataFromUser.StorageHelper.saveUserDetails(userDetails);
+
+        // Extract the last 3 digits of the mobile number
+
+        // Extract the last 3 digits of the address
+        String address = userDetails['address'];
+        String last3DigitsAddress = address.substring(address.length - 3);
+
+        setState(() {
+          // Set the last 3 digits as CustomText
+          loginPage = 1;  // Show next page
+          controller1.text = '';  // Clear mobile field so it's not editable
+          customAddress = last3DigitsAddress;  // Store the last 3 digits for display
+        });
+      } else {
+        CustomSnackBar.warning(message: "Customer ID not found");
+      }
+    } catch (e) {
+      CustomSnackBar.error(message: e.toString());
+    }
+  }
 
   /// Handle Next button press
   Future<void> handleNext() async {
@@ -140,11 +141,7 @@ String customMobileNo = ''; // To store the last 3 digits
       try {
         if (loginPage == 0) {
           // Step 1: Fetch customer details using the entered customer ID
-       
-            setState(() {
-              loginPage = 1;
-            });
-          
+          await fetchCustomerDetails();
         } else if (loginPage == 1) {
           // Step 2: Start timer and move to next screen for the identification code
           setState(() {
@@ -166,7 +163,7 @@ String customMobileNo = ''; // To store the last 3 digits
           // Step 5: Confirm the entered password matches the confirmed password
           if (controllerTextForm.join() == conformTextForm.join()) {
             // If passwords match, proceed to the HomeScreen
-                        Get.offAll(HomeScreen(customerId: '', authToken: '',));
+            Get.offAll(HomeScreen(customerId: controller0.text, authToken: '',));
           } else {
             // If passwords don't match, show an error
             Get.snackbar('Error', 'Passwords do not match');
@@ -209,68 +206,66 @@ String customMobileNo = ''; // To store the last 3 digits
                         ),
                       ),
                     ),
-                   if (loginPage > 0)
-  Positioned(
-    top: 40, // Adjust for the safe area
-    left: 16,
-    child: GestureDetector(
-      onTap: () {
-        setState(() {
-          loginPage--;
-        });
-      },
-      child: Container(
-        padding: EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.5),
-              spreadRadius: 1,
-              blurRadius: 4,
-              offset: Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Icon(
-          Icons.arrow_back,
-          color: AppColors.newa,
-        ),
-      ),
-    ),
-  )
-else
- 
-    Positioned(
-    top: 40, // Adjust for the safe area
-    left: 16,
-    child: GestureDetector(
-      onTap: () {
-        Get.offAll(OnboardingScreen2());
-      },
-      child: Container(
-        padding: EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.5),
-              spreadRadius: 1,
-              blurRadius: 4,
-              offset: Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Icon(
-          Icons.arrow_back,
-          color: AppColors.newa,
-        ),
-      ),
-    ),
-  ),
-
+                    if (loginPage > 0)
+                      Positioned(
+                        top: 40, // Adjust for the safe area
+                        left: 16,
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              loginPage--;
+                            });
+                          },
+                          child: Container(
+                            padding: EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.5),
+                                  spreadRadius: 1,
+                                  blurRadius: 4,
+                                  offset: Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              Icons.arrow_back,
+                              color: AppColors.newa,
+                            ),
+                          ),
+                        ),
+                      )
+                    else
+                      Positioned(
+                        top: 40, // Adjust for the safe area
+                        left: 16,
+                        child: GestureDetector(
+                          onTap: () {
+                            Get.offAll(OnboardingScreen2());
+                          },
+                          child: Container(
+                            padding: EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.5),
+                                  spreadRadius: 1,
+                                  blurRadius: 4,
+                                  offset: Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              Icons.arrow_back,
+                              color: AppColors.newa,
+                            ),
+                          ),
+                        ),
+                      ),
                     Column(
                       children: [
                         SizedBox(height: Get.height * 0.05),
@@ -287,7 +282,9 @@ else
                               : loginPage == 1
                                   ? 'Please enter your mobile phone number ending with'.tr +
                                       '  ' +
-                                      customMobileNo
+                                      customAddress +
+                                      '\n' 
+                                     
                                   : loginPage == 2
                                       ? 'We have sent the identification number to your phone number, please enter the code'
                                           .tr
@@ -307,12 +304,6 @@ else
                             height: Get.height * 0.08,
                             textAlign: TextAlign.center,
                             keyboardType: TextInputType.number,
-                           // validator: (value) {
-                             // if (value == null || value.isEmpty) {
-                             //   return 'Enter the customer number'.tr;
-                            //  }
-                            //  return null;
-                          //  },
                           )
                         else if (loginPage == 1)
                           CustomTextFormField.textFieldStyle(
@@ -323,17 +314,17 @@ else
                             textAlign: TextAlign.center,
                             maxLength: maxLength,
                             keyboardType: TextInputType.number,
-                           // validator: (value) {
-                            //  if (value == null || value.isEmpty) {
-                             //   return 'Enter the phone number'.tr;
-                             // } else if (value.length < maxLength) {
-                            //    return 'Phone number must be $maxLength digits'.tr;
-                           //   } else if (!value.startsWith('07') &&
-                            //    !value.startsWith('9627')) {
-                              //  return 'The value must start with "07" or "9627"'.tr;
-                            //  }
-                            //  return null;
-                           // },
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Enter the phone number'.tr;
+                              } else if (value.length < maxLength) {
+                                return 'Phone number must be $maxLength digits'.tr;
+                              } else if (!value.startsWith('07') &&
+                                  !value.startsWith('9627')) {
+                                return 'The value must start with "07" or "9627"'.tr;
+                              }
+                              return null;
+                            },
                             onChanged: (value) {
                               setState(() {
                                 if (value.startsWith('962')) {
@@ -353,12 +344,6 @@ else
                             textAlign: TextAlign.center,
                             maxLength: 6,
                             keyboardType: TextInputType.number,
-                            // validator: (value) {
-                            //   if (value == null || value.isEmpty) {
-                            //     return 'Enter the identification number'.tr;
-                            //   }
-                            //   return null;
-                            // },
                           )
                         else if (loginPage == 3 || loginPage == 4)
                           Directionality(
@@ -383,19 +368,6 @@ else
                                         counterText: '',
                                         border: OutlineInputBorder(),
                                       ),
-                                      // validator: (value) {
-                                      //   if (value == null || value.isEmpty) {
-                                      //     return 'error'.tr;
-                                      //   }
-                                      //   if (loginPage == 4 &&
-                                      //       (controllerTextForm.isNotEmpty &&
-                                      //           !listEquals(
-                                      //               controllerTextForm,
-                                      //               conformTextForm))) {
-                                      //     return 'Passwords do not match'.tr;
-                                      //   }
-                                      //   return null;
-                                      // },
                                       onChanged: (value) {
                                         _formKey.currentState!.validate();
 
@@ -477,7 +449,7 @@ else
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(23),
                                   border: Border.all(
-                                  width: 2, color: Colors.blue.shade800)),
+                                      width: 2, color: Colors.blue.shade800)),
                               child: FittedBox(
                                   child: CustomText(text: 'Resend'.tr)),
                             ),

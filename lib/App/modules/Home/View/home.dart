@@ -31,17 +31,19 @@ class _HomeScreenState extends State<HomeScreen> {
   int pageIndex = 0; // Index for BottomNavigationBar
 
   // Define your pages
-  final List<Widget> pages = [
-    DailyPage(),       // First Page
-       // Third Page (Profile)
-  ];
+  late List<Widget> pages;
 
   @override
   void initState() {
     super.initState();
     lang = Get.locale == const Locale('ar') ? 'عربي' : 'English';
     fetchLoanData();
+    pages = [
+   //   DailyPage(customerId: widget.customerId), // First Page
+      // Third Page (Profile)
+    ];
   }
+
 
   Future<void> fetchLoanData() async {
     try {

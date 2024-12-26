@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../data/api/constance.dart';
-import 'about_us_screen.dart';
+import '../test/testofloan.dart';
 import 'branches_screen.dart';
 import 'company_details_screen.dart';
 import 'contact_us_screen.dart';
 import 'loan_test.dart';
 import 'profile_screen.dart';
 import 'settings.dart';
-import 'loan_screen.dart';
 import '../OnbordingScreen/splash.dart';
-import '../splash/splash_screen.dart';
 import '../../helper/custom_text.dart';
 import '../../lang/language_view_model.dart';
 
@@ -129,11 +127,17 @@ class _CustomDrawerState extends State<CustomDrawer> {
               icon: Icons.settings,
               onTap: () => Get.to(SettingsScreen()),
             ),
+             _buildDrawerItem(
+              title: 'Settings'.tr,
+              icon: Icons.settings,
+              onTap: () => Get.to(FinancialOverviewPage()),
+            ),
             _buildDrawerItem(
               title: 'Logout'.tr,
               icon: Icons.logout,
               onTap: widget.onLogout ?? () => Get.off(OnboardingScreen2()),
             ),
+            
             const SizedBox(height: 10),
             Padding(
               padding:

@@ -5,7 +5,8 @@ static const Color primaryColor = Color(0xFFFAAF5F);
 
   static const Color secondaryColor = Color(0xFF4CAF50); // Green color
 
-  static const Color accentColor = Color(0xFFFFC107); // Yellow color
+  static const Color accentColor = Color(0xFFF89623)
+; // Yellow color
 
   static const Color backgroundColor = Color(0xFFF5F5F5); // Light grey
 

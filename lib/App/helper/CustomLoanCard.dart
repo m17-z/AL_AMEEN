@@ -1,6 +1,5 @@
+import 'package:al_ameen/App/helper/Colors2.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:get/get.dart';
 
 class CustomLoanCard extends StatelessWidget {
   final String loanId;
@@ -9,8 +8,10 @@ class CustomLoanCard extends StatelessWidget {
   final String loanStatus;
   final String loanStartDate;
   final String interestRate;
-  final String loanTenure;
   final bool isArabic; // Language flag to determine text alignment
+  final String installmentNo;
+  final String paidAmount;
+  final String installmentStatus;
 
   const CustomLoanCard({
     Key? key,
@@ -20,60 +21,84 @@ class CustomLoanCard extends StatelessWidget {
     required this.loanStatus,
     required this.loanStartDate,
     required this.interestRate,
-    required this.loanTenure,
     required this.isArabic,
+    required this.installmentNo,
+    required this.paidAmount,
+    required this.installmentStatus,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(25),
+        color: AppColors.backgroundColor,
+        borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            spreadRadius: 10,
-            blurRadius: 3,
+              color: AppColors.backgroundColor,
           ),
         ],
       ),
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment:
+              isArabic ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
-            // Top row with amount and type
+            // Loan Amount prominently displayed
+            Center(
+              child: Text(
+                "\$$loanAmount",
+                style: const TextStyle(
+                  fontSize: 25,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.redAccent,
+                ),
+              ),
+            ),
+            //const SizedBox(height: 10),
+            // Loan Type
+            // Center(
+            //   child: Text(
+            //     loanType,
+            //     style: const TextStyle(
+            //       fontSize: 20,
+            //       fontWeight: FontWeight.w600,
+            //       color: Colors.black87,
+            //     ),
+            //   ),
+            // ),
+            const Divider(color: Colors.grey, height: 30),
+            // Smaller cards section
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  loanType,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  "\$$loanAmount",
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.red,
-                  ),
-                ),
+                _buildSmallCard("Loan ID", loanId),
+                _buildSmallCard("Status", loanStatus),
               ],
             ),
             const SizedBox(height: 10),
-            // Details section
-            Column(
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildDetailRow(" Loan ID :".tr, loanId),
-                _buildDetailRow(" Status :".tr, loanStatus),
-                _buildDetailRow(" Start Date :".tr, loanStartDate),
-                _buildDetailRow(" Interest Rate :".tr, "$interestRate%"),
-                _buildDetailRow(" Tenure  :".tr, "$loanTenure",),
+                _buildSmallCard("Start Date", loanStartDate),
+                _buildSmallCard("Interest Rate", "$interestRate%"),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildSmallCard("Installment No.", installmentNo),
+                _buildSmallCard("Paid Amount", "\$$paidAmount"),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildSmallCard("Installment Status", installmentStatus),
               ],
             ),
           ],
@@ -82,62 +107,39 @@ class CustomLoanCard extends StatelessWidget {
     );
   }
 
-  // Helper method to build rows with dynamic alignment
- Widget _buildDetailRow(String label, String value) {
-  return Padding(
-    padding: const EdgeInsets.symmetric(vertical: 5),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-children: [
-  // If isArabic is true, place the value first, otherwise the label
-  if (isArabic) ...[
-   
-    Expanded(
-      child: Text(
-        label,
-        textAlign: TextAlign.right,
-        style: const TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
+  // Helper method to build small cards
+  Widget _buildSmallCard(String title, String value) {
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 5),
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Colors.blueAccent.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Colors.blueAccent,
+              ),
+            ),
+            const SizedBox(height: 5),
+            Text(
+              value,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.normal,
+                color: Colors.black87,
+              ),
+            ),
+          ],
         ),
       ),
-    ),
-     Expanded(
-      child: Text(
-        value,
-        textAlign: TextAlign.left,
-        style: const TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.normal,
-          color: Colors.blue
-        ),
-      ),
-    ),
-  ] else ...[
-    
-    Expanded(
-      child: Text(
-        label,
-        textAlign: TextAlign.left,
-        style: const TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    ),
-    Expanded(
-      child: Text(
-        value,
-        textAlign: TextAlign.right,
-        style: const TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.normal,
-        ),
-      ),
-    ),
-  ],
-],
-    ),
-  );
-}
+    );
+  }
 }
