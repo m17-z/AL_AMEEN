@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../data/api/constance.dart';
-import '../test/testofloan.dart';
 import 'branches_screen.dart';
 import 'company_details_screen.dart';
 import 'contact_us_screen.dart';
-import 'loan_test.dart';
 import 'profile_screen.dart';
 import 'settings.dart';
 import '../OnbordingScreen/splash.dart';
@@ -69,20 +67,20 @@ class _CustomDrawerState extends State<CustomDrawer> {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             image: DecorationImage(
-                              image: AssetImage("assets/images/profile.jpg"),
+                              image: AssetImage("assets/images/splash.png"),
                             ),
                           ),
                         ),
                        ),
-                    const SizedBox(height: 20),
-                    CustomText(
-                      fontsize: 14,
-                      alignment: Get.locale == Locale('ar')
-                          ? Alignment.topRight
-                          : Alignment.topLeft,
-                      text: '${'Welcome'.tr}\n',
-                      height: 1.5,
-                    ),
+                    // const SizedBox(height: 20),
+                    // CustomText(
+                    //   fontsize: 14,
+                    //   alignment: Get.locale == Locale('ar')
+                    //       ? Alignment.topRight
+                    //       : Alignment.topLeft,
+                    //  // text: 'Welcome \n at AL-Ameen app'.tr,
+                    //   height: 1.5,
+                    // ),
                   ],
                 ),
               ),
@@ -117,21 +115,17 @@ class _CustomDrawerState extends State<CustomDrawer> {
               icon: Icons.contact_page_outlined,
               onTap: () => Get.to(ContactUsScreen()),
             ),
-             _buildDrawerItem(
-              title: 'Contact Us'.tr,
-              icon: Icons.contact_page_outlined,
-              onTap: () => Get.to(LoanPage()),
-            ),
+            //  _buildDrawerItem(
+            //   title: 'Contact Us'.tr,
+            //   icon: Icons.contact_page_outlined,
+            //   onTap: () => Get.to(LoanPage()),
+            // ),
             _buildDrawerItem(
               title: 'Settings'.tr,
               icon: Icons.settings,
               onTap: () => Get.to(SettingsScreen()),
             ),
-             _buildDrawerItem(
-              title: 'Settings'.tr,
-              icon: Icons.settings,
-              onTap: () => Get.to(FinancialOverviewPage()),
-            ),
+            
             _buildDrawerItem(
               title: 'Logout'.tr,
               icon: Icons.logout,

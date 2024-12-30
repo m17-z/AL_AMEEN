@@ -1,9 +1,7 @@
 import 'dart:async';
-
 import '../../data/api/constance.dart';
 import '../../helper/extentions.dart';
-import '../Home/View/home.dart';
-import '../Home/View/home_screen.dart';
+import '../Home/View/loan_test.dart';
 import '../../helper/custom_text.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -69,7 +67,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
           } else {
             payment = 0;
             canPop = true;
-                        Get.offAll(HomeScreen(customerId: '', authToken: '',));
+                        Get.offAll(loanshome());
             //  didPop = canPop;
           }
         });

@@ -1,5 +1,6 @@
 import '../../helper/Colors2.dart';
-import '../Home/View/home.dart';
+import '../Home/View/loan_test.dart';
+import '../unused_filles/home.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -99,7 +100,7 @@ void _toggleLanguage() {
               // الصفحة الثانية
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16), // بادنج من اليمين واليسار
-                color: AppColors.newa.withOpacity(0.7), // لون مع شفافية
+                color: AppColors.newa.withOpacity(0.9), // لون مع شفافية
                 child: Center(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -134,7 +135,7 @@ void _toggleLanguage() {
               // الصفحة الثالثة
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16), // بادنج من اليمين واليسار
-                color: AppColors.newa.withOpacity(0.7), // لون مع شفافية
+                color: AppColors.newa.withOpacity(0.9), // لون مع شفافية
                 child: Center(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -367,7 +368,7 @@ void _toggleLanguage() {
                   Spacer(),
                   TextButton(
                     onPressed: () async {
-                        Get.to(HomeScreen(customerId: '', authToken: '',));
+                        Get.to(loanshome()) ;
                     },
                     style: TextButton.styleFrom(
                       shape: RoundedRectangleBorder(

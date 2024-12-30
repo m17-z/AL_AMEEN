@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:al_ameen/App/helper/Colors2.dart';
 
 class LoanCard extends StatelessWidget {
   final Map<String, dynamic> loan;
@@ -38,19 +39,21 @@ class LoanCard extends StatelessWidget {
 
     return GestureDetector(
       onTap: () => onTapLoan(loan.map((key, value) => MapEntry(key, value.toString()))),
-      child: Container(
-        margin: const EdgeInsets.only(right: 16),
-        padding: const EdgeInsets.all(16),
-        width: 350, // Fixed width for the container
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        margin: const EdgeInsets.only(left: 30 , right: 30),
+       // padding: const EdgeInsets.all(16),
+        width: MediaQuery.of(context).size.width * 0.85,
+        height: MediaQuery.of(context).size.height * 0.4,
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          color: AppColors.backgroundColor,
+          borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
-              spreadRadius: 3,
-              blurRadius: 5,
-              offset: const Offset(0, 3),
+              color: AppColors.accentColor.withOpacity(0.2),
+              spreadRadius: 2,
+              blurRadius: 8,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
@@ -58,78 +61,100 @@ class LoanCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.newa,
+                    shape: BoxShape.circle,
+                  ),
+                  padding: const EdgeInsets.all(12),
+                  child: Icon(loanIcon, color: Colors.white, size: 20),
+                ),
+                const SizedBox(width: 16),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(loanIcon, color: Colors.blue),
-                    const SizedBox(width: 10),
                     Text(
-                      '${loan['type']}',
+                      loan['type'],
                       style: const TextStyle(
-                        fontSize: 18,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
                       ),
                     ),
+                    const SizedBox(height: 4),
+                    Text(
+                      "Active".tr,
+                      style: TextStyle(
+                        fontSize: 14,
+                  //      color: Colors.white.withOpacity(0.8),
+                      ),
+                    ),
                   ],
                 ),
-                Text(
-                  "Active".tr,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue,
+              ],
+            ),
+            // const SizedBox(height: 10),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0),
+              child: Column(
+              children: [
+                _buildInfoRow("Amount".tr, "\$${(loan['amount'] as double).toStringAsFixed(2)}", context),
+                _buildInfoRow("Interest".tr, "${loan['interest']}%", context),
+                _buildInfoRow("Loan ID".tr, "${loan['ID']}", context),
+                _buildInfoRow("Due Date".tr, "${loan['dueDate']}", context),
+                const SizedBox(height: 10),
+                 Text(
+
+              "Percentage Paid".tr + ": ${(loanPercentage * 100).toStringAsFixed(0)}%",
+              style: const TextStyle(
+                fontSize: 16,
+                 fontWeight: FontWeight.bold,
+                  color: Colors.black
+                  
                   ),
-                ),
-              ],
             ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text("Amount:".tr + "\$${(loan['amount'] as double).toStringAsFixed(2)}",
-                    style: const TextStyle(fontSize: 16, color: Colors.grey)),
-                Text("Interest:".tr + " ${loan['interest']}%",
-                    style: const TextStyle(fontSize: 16, color: Colors.grey)),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text("Loan ID:".tr + "${loan['ID']}",
-                    style: const TextStyle(fontSize: 16, color: Colors.grey, fontWeight: FontWeight.bold)),
-              ],
-            ),
-            const SizedBox(height: 5),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text("Due Date:".tr + " ${loan['dueDate']}",
-                    style: const TextStyle(fontSize: 16, color: Colors.grey)),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text("Percentage:".tr + " ${(loanPercentage * 100).toStringAsFixed(0)}%",
-                    style: const TextStyle(fontSize: 16, color: Colors.blue)),
-              ],
-            ),
-            const SizedBox(height: 10),
-            SizedBox(
-              width: double.infinity, // Linear progress indicator width
+            const SizedBox(height: 8),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
               child: LinearProgressIndicator(
                 value: loanPercentage,
-                backgroundColor: Colors.grey.withOpacity(0.3),
-                color: Colors.blue,
-                minHeight: 5,
+            //    backgroundColor: Colors.white.withOpacity(0.3),
+                color: AppColors.newa,
+                minHeight: 8,
               ),
             ),
+              ],
+              ),
+              
+            ),
+           
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value, BuildContext context) {
+    return Padding(
+      padding:  EdgeInsets.symmetric(vertical: 3),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(fontSize: 16,                 color: Colors.black,
+),
+          ),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+                        color: Colors.black,
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -1,5 +1,6 @@
 import 'package:al_ameen/App/helper/Colors2.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class CustomLoanCard extends StatelessWidget {
   final String loanId;
@@ -41,7 +42,7 @@ class CustomLoanCard extends StatelessWidget {
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(10),
         child: Column(
           crossAxisAlignment:
               isArabic ? CrossAxisAlignment.end : CrossAxisAlignment.start,
@@ -51,54 +52,43 @@ class CustomLoanCard extends StatelessWidget {
               child: Text(
                 "\$$loanAmount",
                 style: const TextStyle(
-                  fontSize: 25,
+                  fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: Colors.redAccent,
                 ),
               ),
             ),
-            //const SizedBox(height: 10),
-            // Loan Type
-            // Center(
-            //   child: Text(
-            //     loanType,
-            //     style: const TextStyle(
-            //       fontSize: 20,
-            //       fontWeight: FontWeight.w600,
-            //       color: Colors.black87,
-            //     ),
-            //   ),
-            // ),
-            const Divider(color: Colors.grey, height: 30),
+         
+            const Divider(color: Colors.grey, height: 15),
             // Smaller cards section
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildSmallCard("Loan ID", loanId),
-                _buildSmallCard("Status", loanStatus),
+                _buildSmallCard("Loan ID".tr, loanId),
+                _buildSmallCard("Status".tr, loanStatus),
               ],
             ),
             const SizedBox(height: 10),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildSmallCard("Start Date", loanStartDate),
-                _buildSmallCard("Interest Rate", "$interestRate%"),
+                _buildSmallCard("Start Date".tr, loanStartDate),
+                _buildSmallCard("Interest Rate".tr, "$interestRate%"),
               ],
             ),
             const SizedBox(height: 10),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildSmallCard("Installment No.", installmentNo),
-                _buildSmallCard("Paid Amount", "\$$paidAmount"),
+                _buildSmallCard("Installment No.".tr, installmentNo),
+                _buildSmallCard("Paid Amount".tr, "\$$paidAmount"),
               ],
             ),
             const SizedBox(height: 10),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildSmallCard("Installment Status", installmentStatus),
+                _buildSmallCard("Installment Status".tr, installmentStatus),
               ],
             ),
           ],

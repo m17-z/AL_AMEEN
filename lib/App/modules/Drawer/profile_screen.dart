@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../helper/Colors2.dart';
 import '../../helper/custom_wave.dart';
+import '../../helper/custom_waves.dart'; // Assuming this contains your wave designs
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -90,64 +92,51 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ),
             ),
-            Column(
-              children: [
-                SizedBox(height: 70),
-                // Profile Image
-                Center(
-                  child: GestureDetector(
-                    onTap: () => _showImagePickerOptions(context),
-                    child: CircleAvatar(
-                      radius: 50,
-                      backgroundImage: _image != null ? FileImage(File(_image!.path)) : AssetImage('assets/images/profile.jpg') as ImageProvider,
-                      backgroundColor: Colors.white,
-                      child: Stack(
-                        children: [
-                          Align(
-                            alignment: Alignment.bottomRight,
-                            child: CircleAvatar(
-                              radius: 18,
-                              backgroundColor: Colors.grey[800],
-                              child: Icon(Icons.edit, size: 18, color: Colors.white),
-                            ),
-                          ),
-                        ],
+            Container(
+              child: Column(
+                children: [
+                  SizedBox(height: 70),
+                  // Profile Image
+                  Center(
+                    child: GestureDetector(
+                      onTap: () => _showImagePickerOptions(context),
+                      child: CircleAvatar(
+                        radius: 50,
+                        backgroundImage: AssetImage('assets/images/splash.png'),
+                        backgroundColor: Colors.white,
+                        child: Stack(
+                          children: [],
+                        ),
                       ),
                     ),
                   ),
-                ),
-                SizedBox(height: 20),
+                  SizedBox(height: 20),
 
-                // Form Section
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      buildTextField("Name", nameController, Icons.person),
-                      SizedBox(height: 20),
-                      buildTextField("Mobile Number", mobileController, Icons.phone),
-                      SizedBox(height:20  ),
-                      buildTextField("coustomer ID ", coustomerid, Icons.person),
-                          SizedBox(height:20  ),
-                      buildTextField("Address", addressController, Icons.home),
-                      SizedBox(height: 30),
-                      ElevatedButton(
-                        onPressed: () {
-                          print("Profile Updated");
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.newa,
-                          minimumSize: Size(double.infinity, 50),
-                        ),
-                        child: Text(
-                          "Update",
-                          style: TextStyle(color: Colors.white, fontSize: 18),
-                        ),
-                      ),
-                    ],
+                  // Form Section
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        buildTextField("Name".tr, nameController, Icons.person),
+                        SizedBox(height: 20),
+                        buildTextField("Mobile Number".tr, mobileController, Icons.phone),
+                        SizedBox(height: 20),
+                        buildTextField("Customer ID".tr, coustomerid, Icons.numbers),
+                        SizedBox(height: 20),
+                        buildTextField("Address".tr, addressController, Icons.home),
+                        SizedBox(height: 30),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+
+                  // Custom Waves Section
+
+                  SizedBox(height: 20),
+                  // Custom Waves Section
+
+                  SizedBox(height: 20),
+                ],
+              ),
             ),
           ],
         ),

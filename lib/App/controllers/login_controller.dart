@@ -1,13 +1,14 @@
 import 'dart:async';
-import '../modules/Home/View/home_screen.dart';
-import '../modules/splash/auth_view_model.dart';
+import '../modules/Home/View/loan_test.dart';
+import '../modules/unused_filles/home_screen.dart';
+import '../modules/unused_filles/splash/auth_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../data/api/session.dart';
 import '../helper/custom_snack.dart';
 import '../data/api/storage_helper.dart';
-import '../modules/Home/View/home.dart'; // Add this import
+import '../modules/unused_filles/home.dart'; // Add this import
 
 class LoginController extends GetxController {
   // Form key
@@ -130,7 +131,7 @@ class LoginController extends GetxController {
           // Step 5: Confirm the entered password matches the confirmed password
           if (controllerTextForm.join() == conformTextForm.join()) {
             // If passwords match, proceed to the HomeScreen
-            Get.offAll(HomeScreen(customerId: '', authToken: '',));
+            Get.offAll(loanshome());
           } else {
             // If passwords don't match, show an error
             Get.snackbar('Error', 'Passwords do not match');

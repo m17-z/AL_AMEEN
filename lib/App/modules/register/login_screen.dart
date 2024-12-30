@@ -1,14 +1,10 @@
 import 'dart:async';
-import '../splash/splash_screen.dart';
-import '../Home/View/home_screen.dart';
-import '../splash/auth_view_model.dart';
-import '../../helper/custom_waves.dart';
-import 'package:flutter/foundation.dart';
+import '../Home/View/loan_test.dart';
+import '../unused_filles/splash/auth_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import '../../data/api/data from user.dart' as dataFromUser;
-import '../../data/api/session.dart' as session;
 import '../../data/api/session.dart';
 import '../../helper/Colors2.dart';
 import '../../helper/cusoum_snackbar.dart';
@@ -16,7 +12,6 @@ import '../../helper/custom_button.dart';
 import '../../helper/custom_text.dart';
 import '../../helper/custom_textformfield.dart';
 import '../../helper/custom_wave.dart';
-import '../Home/View/home.dart';
 import '../OnbordingScreen/splash.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -163,7 +158,7 @@ class _LoginScreenState extends State<LoginScreen> {
           // Step 5: Confirm the entered password matches the confirmed password
           if (controllerTextForm.join() == conformTextForm.join()) {
             // If passwords match, proceed to the HomeScreen
-            Get.offAll(HomeScreen(customerId: controller0.text, authToken: '',));
+            Get.offAll(loanshome());
           } else {
             // If passwords don't match, show an error
             Get.snackbar('Error', 'Passwords do not match');
@@ -420,7 +415,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             },
                             child: CustomText(
                               text: loginPage == 0
-                                  ? 'How to get your corporal code'.tr
+                                  ? ''.tr
                                   : loginPage == 2
                                       ? 'You did not receive the identification code? Send again later'
                                           .tr +

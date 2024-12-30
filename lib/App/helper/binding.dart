@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 
-import '../modules/splash/auth_view_model.dart';
+import '../modules/unused_filles/splash/auth_view_model.dart';
 import '../modules/Home/controller/home_controller.dart';
 
 class Binding extends Bindings{
