@@ -426,6 +426,8 @@ class Languages extends Translations {
   "Update" : "تحديث",
   "Loan Status" : "حالة القرض",
   "Loan Start Date" : "تاريخ بدء القرض",
+  "Amount Borrowed"  : "المبلغ المقترض",
+  
         },
       };
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../data/api/constance.dart';
 import 'branches_screen.dart';
 import 'company_details_screen.dart';
@@ -20,6 +21,7 @@ class CustomDrawer extends StatefulWidget {
 
 class _CustomDrawerState extends State<CustomDrawer> {
   String? lang;
+  bool isGuest = false;
 
   @override
   void initState() {
@@ -27,6 +29,50 @@ class _CustomDrawerState extends State<CustomDrawer> {
     lang = Get.locale == Locale('ar') ? 'English' : 'عربي';
   }
 
+  
+
+  Future<void> handleProfileTap() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final firstName = prefs.getString('firstName') ?? '';
+    final lastName = prefs.getString('lastName') ?? '';
+    final mobileNo = prefs.getString('mobileNo') ?? '';
+    final address = prefs.getString('address') ?? '';
+    final customerId = prefs.getString('customerId') ?? '';
+
+    if (firstName.isEmpty && lastName.isEmpty && mobileNo.isEmpty && address.isEmpty && customerId.isEmpty) {
+      Get.snackbar(
+        'Guest Mode',
+        'You are in guest mode. Please log in.',
+        snackPosition: SnackPosition.TOP,
+
+        backgroundColor: Colors.white.withOpacity(0.7),
+        colorText: Colors.black,
+      );
+    } else {
+      Get.to(ProfilePage());
+    }
+  }
+Future<void> handlesittingtap() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final firstName = prefs.getString('firstName') ?? '';
+    final lastName = prefs.getString('lastName') ?? '';
+    final mobileNo = prefs.getString('mobileNo') ?? '';
+    final address = prefs.getString('address') ?? '';
+    final customerId = prefs.getString('customerId') ?? '';
+
+    if (firstName.isEmpty && lastName.isEmpty && mobileNo.isEmpty && address.isEmpty && customerId.isEmpty) {
+      Get.snackbar(
+        'Guest Mode',
+        'You are in guest mode. Please log in.',
+        snackPosition: SnackPosition.TOP,
+      backgroundColor: Colors.white.withOpacity(0.7),
+        colorText: Colors.black,
+
+      );
+    } else {
+      Get.to(SettingsScreen());
+    }
+  }
   void _toggleLanguage() {
     setState(() {
       if (Get.locale == Locale('ar')) {
@@ -72,15 +118,6 @@ class _CustomDrawerState extends State<CustomDrawer> {
                           ),
                         ),
                        ),
-                    // const SizedBox(height: 20),
-                    // CustomText(
-                    //   fontsize: 14,
-                    //   alignment: Get.locale == Locale('ar')
-                    //       ? Alignment.topRight
-                    //       : Alignment.topLeft,
-                    //  // text: 'Welcome \n at AL-Ameen app'.tr,
-                    //   height: 1.5,
-                    // ),
                   ],
                 ),
               ),
@@ -88,24 +125,14 @@ class _CustomDrawerState extends State<CustomDrawer> {
             _buildDrawerItem(
               title: 'Personal Details'.tr,
               icon: Icons.person,
-              onTap: () => Get.to(ProfilePage()),
+              onTap: handleProfileTap,
             ),
-            // _buildDrawerItem(
-            //   title: 'Loan Details'.tr,
-            //   icon: Icons.description_outlined,
-            //   onTap: () => Get.to(LoanScreen(
-            //    loanDetails: [{'Loan ID': '0000',
-            //     'Loan Amount': '1000',
-            //      'Loan Type': 'Personal Loan',
-            //       'Loan Status': 'Pending  '}],
-            //    )),
-            // ),
             _buildDrawerItem(
               title: 'Company Details'.tr,
               icon: Icons.description_outlined,
               onTap: () => Get.to(CompanyInfoScreen()),
             ),
-              _buildDrawerItem(
+            _buildDrawerItem(
               title: 'Branches'.tr,
               icon: Icons.location_on,
               onTap: () => Get.to(BranchesScreen()),
@@ -115,23 +142,16 @@ class _CustomDrawerState extends State<CustomDrawer> {
               icon: Icons.contact_page_outlined,
               onTap: () => Get.to(ContactUsScreen()),
             ),
-            //  _buildDrawerItem(
-            //   title: 'Contact Us'.tr,
-            //   icon: Icons.contact_page_outlined,
-            //   onTap: () => Get.to(LoanPage()),
-            // ),
             _buildDrawerItem(
               title: 'Settings'.tr,
               icon: Icons.settings,
-              onTap: () => Get.to(SettingsScreen()),
+              onTap: handlesittingtap,
             ),
-            
             _buildDrawerItem(
               title: 'Logout'.tr,
               icon: Icons.logout,
               onTap: widget.onLogout ?? () => Get.off(OnboardingScreen2()),
             ),
-            
             const SizedBox(height: 10),
             Padding(
               padding:

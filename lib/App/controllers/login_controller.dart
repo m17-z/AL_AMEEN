@@ -1,15 +1,11 @@
 import 'dart:async';
-import '../modules/Home/View/loan_test.dart';
-import '../modules/unused_filles/home_screen.dart';
+import '../modules/Home/View/home.dart';
 import '../modules/unused_filles/splash/auth_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../data/api/session.dart';
 import '../helper/custom_snack.dart';
 import '../data/api/storage_helper.dart';
-import '../modules/unused_filles/home.dart'; // Add this import
-
 class LoginController extends GetxController {
   // Form key
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();

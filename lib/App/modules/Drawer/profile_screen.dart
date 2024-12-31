@@ -5,7 +5,7 @@ import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../helper/Colors2.dart';
 import '../../helper/custom_wave.dart';
-import '../../helper/custom_waves.dart'; // Assuming this contains your wave designs
+import '../../helper/custom_waves.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -19,6 +19,7 @@ class _ProfilePageState extends State<ProfilePage> {
   final TextEditingController addressController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
   XFile? _image;
+  bool isGuest = false;
 
   @override
   void initState() {
@@ -35,10 +36,13 @@ class _ProfilePageState extends State<ProfilePage> {
     final customerId = prefs.getString('customerId') ?? '';
 
     setState(() {
-      nameController.text = '$firstName $lastName';
-      mobileController.text = mobileNo;
-      addressController.text = address;
-      coustomerid.text = customerId;
+   
+        nameController.text = '$firstName $lastName';
+        mobileController.text = mobileNo;
+        addressController.text = address;
+        coustomerid.text = customerId;
+        isGuest = false;
+      
     });
   }
 
@@ -92,56 +96,69 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ),
             ),
-            Container(
-              child: Column(
-                children: [
-                  SizedBox(height: 70),
-                  // Profile Image
-                  Center(
-                    child: GestureDetector(
-                      onTap: () => _showImagePickerOptions(context),
-                      child: CircleAvatar(
-                        radius: 50,
-                        backgroundImage: AssetImage('assets/images/splash.png'),
-                        backgroundColor: Colors.white,
-                        child: Stack(
-                          children: [],
-                        ),
+            Column(
+              children: [
+                SizedBox(height: 70),
+                // Profile Image
+                Center(
+                  child: GestureDetector(
+                    onTap: () => _showImagePickerOptions(context),
+                    child: CircleAvatar(
+                      radius: 50,
+                      backgroundImage: AssetImage('assets/images/splash.png'),
+                      backgroundColor: Colors.white,
+                      child: Stack(
+                        children: [
+                          // Align(
+                          //   alignment: Alignment.bottomRight,
+                          //   child: CircleAvatar(
+                          //     radius: 18,
+                          //     backgroundColor: Colors.grey[800],
+                          //     child: Icon(Icons.edit, size: 18, color: Colors.white),
+                          //   ),
+                          // ),
+                        ],
                       ),
                     ),
                   ),
-                  SizedBox(height: 20),
+                ),
+                SizedBox(height: 20),
 
-                  // Form Section
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      children: [
+                // Form Section
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      if (isGuest)
+                        Text(
+                          'You are in guest mode. Please log in.',
+                          style: TextStyle(color: Colors.red, fontSize: 16),
+                        )
+                      else ...[
                         buildTextField("Name".tr, nameController, Icons.person),
                         SizedBox(height: 20),
                         buildTextField("Mobile Number".tr, mobileController, Icons.phone),
-                        SizedBox(height: 20),
-                        buildTextField("Customer ID".tr, coustomerid, Icons.numbers),
-                        SizedBox(height: 20),
+                        SizedBox(height:20  ),
+                        buildTextField("coustomer ID ".tr, coustomerid, Icons.numbers),
+                            SizedBox(height:20  ),
                         buildTextField("Address".tr, addressController, Icons.home),
                         SizedBox(height: 30),
                       ],
-                    ),
+                    ],
                   ),
+                  
+                ),
 
-                  // Custom Waves Section
-
-                  SizedBox(height: 20),
-                  // Custom Waves Section
-
-                  SizedBox(height: 20),
-                ],
-              ),
+              ],
             ),
           ],
+           
+
         ),
+              
       ),
     );
+  
   }
 
   void _showImagePickerOptions(BuildContext context) {
@@ -169,6 +186,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ],
         ),
       ),
+      
     );
   }
 

@@ -1,7 +1,7 @@
 import 'dart:async';
 import '../../data/api/constance.dart';
 import '../../helper/extentions.dart';
-import '../Home/View/loan_test.dart';
+import '../Home/View/home.dart';
 import '../../helper/custom_text.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -27,12 +27,16 @@ class _PaymentScreenState extends State<PaymentScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController Identification = TextEditingController();
   TextEditingController verification = TextEditingController();
+  TextEditingController searchController = TextEditingController();
+  List<int> bankNumbers = List.generate(23, (index) => index + 1); // List of bank numbers
+  List<int> filteredBankNumbers = [];
   List<String> language = ['Arabic', 'English'];
   Timer? _timer;
   @override
   void initState() {
     super.initState();
     lang = Get.locale==Locale('ar') ? 'عربي' : 'English';
+    filteredBankNumbers = bankNumbers; // Initialize with all bank numbers
   }
   // final now = DateTime.now();
   // var formattedDate;
@@ -43,11 +47,23 @@ class _PaymentScreenState extends State<PaymentScreen> {
         setState(() {
           count--;
         });
-        startTimer(); // استدعاء نفس الدالة لإعادة تشغيل التايمر إلى أن يصل العداد إلى الصفر
+        startTimer(); 
       }else{
         _timer!.cancel();
         count =60;
 
+      }
+    });
+  }
+
+  void filterBanks(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        filteredBankNumbers = bankNumbers;
+      } else {
+        filteredBankNumbers = bankNumbers
+            .where((number) => number.toString().contains(query))
+            .toList();
       }
     });
   }
@@ -349,42 +365,48 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                     height: 1,
                                     color: Colors.grey,
                                   ),
-                                  15.height,
-                                  SizedBox(
-                                    height: Get.height*.6,
-                                    child: GridView.builder(
-                                      // shrinkWrap: true,
-                                      gridDelegate:
-                                          SliverGridDelegateWithFixedCrossAxisCountAndFixedHeight(
-                                        crossAxisCount: 2, height: Get.width*.25,
-                                      ),
-                                      itemCount: 10,
-                                      itemBuilder:
-                                          (BuildContext context, int index) {
-                                        bool isSelected = index == indexValue;
-                                        return InkWell(
-                                          onTap: (){
-                                            setState(() {
-                                              indexValue = index;
-                                            });
-                                          },
-                                          child: Container(
-                                            margin: const EdgeInsets.all(5.0),
-                                            decoration: BoxDecoration(
-                                              border: Border.all(width: isSelected ? 3 : 2,  color:  isSelected ? Colors.blue.shade800 : Colors.grey,),
-                                            ),
-                                            width: Get.width*.25,
-                                            child:  Image.asset(
-                                              'assets/images/madfooatCom.png',
-                                              width: Get.width * .5,
-                                              height: Get.height * .2,
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
+                                
+                                  SizedBox(height:Get.height * 0.02),
+                                    SizedBox(
+                                  height: Get.height * .55,
+                                   child: GridView.builder(
+  gridDelegate: SliverGridDelegateWithFixedCrossAxisCountAndFixedHeight(
+    crossAxisCount: 3, // 4 columns for better fitting 24 items
+    height: Get.height * .19,
+    
+  ),
+  itemCount: filteredBankNumbers.length, // Update item count to 24
+  itemBuilder: (BuildContext context, int index) {
+    int bankNumber = filteredBankNumbers[index];
+    bool isSelected = bankNumber == indexValue;
+    return InkWell(
+      onTap: () {
+        setState(() {
+          indexValue = bankNumber;
+        });
+      },
+      child: Container(
+        margin: const EdgeInsets.all(5.0),
+        decoration: BoxDecoration(
+          border: Border.all(
+            width: isSelected ? 3 : 2,
+            color: isSelected ? Colors.blue.shade800 : Colors.grey,
+          ),
+        ),
+        width: Get.width * .35,
+        child: Image.asset(
+          'assets/bank/bank_$bankNumber.png', 
+          // Dynamically load images
+          width: Get.width * .5,
+          height: Get.height * .2,
+        ),
+      ),
+    );
+  },
+),
 
+                                    ),
+                                     
                                 ],
                               ),
                             ),
@@ -653,6 +675,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
   void dispose() {
     // Cancel the timer in the dispose method
     _timer?.cancel();
+    searchController.dispose();
     super.dispose();
   }
 }

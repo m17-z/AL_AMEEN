@@ -43,11 +43,11 @@ class CustomTextFormField {
         validator:validator ,
         textDirection: Get.locale==const Locale('ar')? TextDirection.rtl : TextDirection.ltr,
         controller: controller,
-        cursorColor: Constants.primaryColor,
+        cursorColor: Constants.fontColor,
 
 
         decoration: InputDecoration(
-          fillColor: Colors.grey,
+          fillColor: Colors.black,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(20.0),
           ),

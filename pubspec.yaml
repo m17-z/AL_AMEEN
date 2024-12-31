@@ -29,6 +29,7 @@ dependencies:
   #  flutter_rating_bar: ^4.0.1
   # Lottie Animation
   lottie: ^2.3.0
+  animated_text_kit: ^4.2.1
 #  flutter_svg: ^1.1.6
 #  # printers
 #  esc_pos_printer: ^4.1.0
@@ -50,7 +51,6 @@ dependencies:
   google_fonts: ^6.2.1
   icon_badge: ^1.0.0
   fl_chart: ^0.70.0
-
   # device_preview: ^1.1.0
 #  rename: ^3.0.1
 
@@ -82,6 +82,7 @@ flutter:
     - assets/image/
     - assets/fonts/
     - assets/Video/
+    - assets/bank/
 
 video_player:
   fonts:

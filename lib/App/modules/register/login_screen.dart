@@ -1,5 +1,7 @@
 import 'dart:async';
-import '../Home/View/loan_test.dart';
+import 'package:al_ameen/App/modules/register/formfields.dart';
+
+import '../Home/View/home.dart';
 import '../unused_filles/splash/auth_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -13,36 +15,31 @@ import '../../helper/custom_text.dart';
 import '../../helper/custom_textformfield.dart';
 import '../../helper/custom_wave.dart';
 import '../OnbordingScreen/splash.dart';
+import 'package:animated_text_kit/animated_text_kit.dart';
 
 class LoginScreen extends StatefulWidget {
   final String? baseUrlGet;
-
-  const LoginScreen({
+const LoginScreen({
     Key? key,
     this.baseUrlGet,
   }) : super(key: key);
-
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
-
 class _LoginScreenState extends State<LoginScreen> {
   // Form key
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String customAddress = ''; // To store the last 3 digits of the address
-
   // Controllers for different fields
   final TextEditingController controller0 = TextEditingController(); // Customer ID
   final TextEditingController controller1 = TextEditingController(); // Mobile Number
   final TextEditingController controller2 = TextEditingController(); // Identification Number
   final TextEditingController pinCode = TextEditingController();
-
   // Controllers for 6-digit password
   List<TextEditingController> _controllers =
       List.generate(6, (_) => TextEditingController());
   List<TextEditingController> _conform =
       List.generate(6, (_) => TextEditingController());
-
   // FocusNodes for 6-digit password
   List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
 
@@ -189,214 +186,45 @@ class _LoginScreenState extends State<LoginScreen> {
                   alignment: Alignment.center,
                   children: [
                     // Custom Waves Decoration
-                    Positioned(
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      child: ClipPath(
-                        clipper: WaveClipper(),
-                        child: Container(
-                          height: 150,
-                          color: AppColors.newa,
-                        ),
-                      ),
-                    ),
+                   
                     if (loginPage > 0)
-                      Positioned(
-                        top: 40, // Adjust for the safe area
-                        left: 16,
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              loginPage--;
-                            });
-                          },
-                          child: Container(
-                            padding: EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.5),
-                                  spreadRadius: 1,
-                                  blurRadius: 4,
-                                  offset: Offset(0, 3),
-                                ),
-                              ],
-                            ),
-                            child: Icon(
-                              Icons.arrow_back,
-                              color: AppColors.newa,
-                            ),
-                          ),
-                        ),
-                      )
+                      _buildBackButton(() {
+                        setState(() {
+                          loginPage--;
+                        });
+                      })
                     else
-                      Positioned(
-                        top: 40, // Adjust for the safe area
-                        left: 16,
-                        child: GestureDetector(
-                          onTap: () {
-                            Get.offAll(OnboardingScreen2());
-                          },
-                          child: Container(
-                            padding: EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.5),
-                                  spreadRadius: 1,
-                                  blurRadius: 4,
-                                  offset: Offset(0, 3),
-                                ),
-                              ],
-                            ),
-                            child: Icon(
-                              Icons.arrow_back,
-                              color: AppColors.newa,
-                            ),
-                          ),
-                        ),
-                      ),
+                      _buildBackButton(() {
+                        Get.offAll(OnboardingScreen2());
+                      }),
                     Column(
+                      
                       children: [
-                        SizedBox(height: Get.height * 0.05),
-                        Image.asset(
-                          'assets/images/splash.png',
-                          width: Get.width * 0.3,
-                          height: Get.height * 0.3,
-                        ),
-                        SizedBox(height: 20),
+                        _buildHeader(),
+                        const SizedBox(height: 20),
                         CustomText(
                           padding: EdgeInsets.symmetric(horizontal: 12),
-                          text: loginPage == 0
-                              ? 'Enter your customer number'.tr
-                              : loginPage == 1
-                                  ? 'Please enter your mobile phone number ending with'.tr +
-                                      '  ' +
-                                      customAddress +
-                                      '\n' 
-                                     
-                                  : loginPage == 2
-                                      ? 'We have sent the identification number to your phone number, please enter the code'
-                                          .tr
-                                      : loginPage == 3
-                                          ? 'Please create your own 6-digit password'.tr
-                                          : 'Please confirm your 6-digit password'.tr,
+                          text: _getHeaderText(),
                           fontsize: 15,
                           fontWeight: FontWeight.w500,
                           height: 1.8,
                         ),
                         SizedBox(height: 20),
-                        if (loginPage == 0)
-                          CustomTextFormField.textFieldStyle(
-                            controller: controller0,
-                            hintText: 'Customer Number'.tr,
-                            width: Get.width * 0.6,
-                            height: Get.height * 0.08,
-                            textAlign: TextAlign.center,
-                            keyboardType: TextInputType.number,
-                          )
-                        else if (loginPage == 1)
-                          CustomTextFormField.textFieldStyle(
-                            controller: controller1,
-                            hintText: 'Phone Number'.tr,
-                            width: Get.width * 0.6,
-                            height: Get.height * 0.08,
-                            textAlign: TextAlign.center,
-                            maxLength: maxLength,
-                            keyboardType: TextInputType.number,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Enter the phone number'.tr;
-                              } else if (value.length < maxLength) {
-                                return 'Phone number must be $maxLength digits'.tr;
-                              } else if (!value.startsWith('07') &&
-                                  !value.startsWith('9627')) {
-                                return 'The value must start with "07" or "9627"'.tr;
-                              }
-                              return null;
-                            },
-                            onChanged: (value) {
-                              setState(() {
-                                if (value.startsWith('962')) {
-                                  maxLength = 12;
-                                } else {
-                                  maxLength = 10;
-                                }
-                              });
-                            },
-                          )
-                        else if (loginPage == 2)
-                          CustomTextFormField.textFieldStyle(
-                            controller: controller2,
-                            hintText: 'Identification Number'.tr,
-                            width: Get.width * 0.6,
-                            height: Get.height * 0.08,
-                            textAlign: TextAlign.center,
-                            maxLength: 6,
-                            keyboardType: TextInputType.number,
-                          )
-                        else if (loginPage == 3 || loginPage == 4)
-                          Directionality(
-                            textDirection: TextDirection.ltr,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(6, (index) {
-                                return Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: SizedBox(
-                                    width: 40,
-                                    child: TextFormField(
-                                      controller: loginPage == 3
-                                          ? _controllers[index]
-                                          : _conform[index],
-                                      focusNode: _focusNodes[index],
-                                      maxLength: 1,
-                                      obscureText: true,
-                                      textAlign: TextAlign.center,
-                                      keyboardType: TextInputType.number,
-                                      decoration: InputDecoration(
-                                        counterText: '',
-                                        border: OutlineInputBorder(),
-                                      ),
-                                      onChanged: (value) {
-                                        _formKey.currentState!.validate();
-
-                                        if (value.length == 1) {
-                                          if (loginPage == 3) {
-                                            if (index < _controllers.length - 1) {
-                                              FocusScope.of(context)
-                                                  .requestFocus(
-                                                      _focusNodes[index + 1]);
-                                            }
-                                            controllerTextForm.clear();
-                                            for (var ctrl in _controllers) {
-                                              controllerTextForm.add(ctrl.text);
-                                            }
-                                          } else {
-                                            conformTextForm.clear();
-                                            for (var conformCtrl in _conform) {
-                                              conformTextForm
-                                                  .add(conformCtrl.text);
-                                            }
-                                            if (index < _conform.length - 1) {
-                                              FocusScope.of(context)
-                                                  .requestFocus(
-                                                      _focusNodes[index + 1]);
-                                            }
-                                          }
-                                        }
-                                      },
-                                    ),
-                                  ),
-                                );
-                              }),
-                            ),
-                          ),
+                        FormFields.build(
+                          loginPage: loginPage,
+                          context: context,
+                          formKey: _formKey,
+                          controller0: controller0,
+                          controller1: controller1,
+                          controller2: controller2,
+                          controllers: _controllers,
+                          conform: _conform,
+                          focusNodes: _focusNodes,
+                          setState: setState,
+                          controllerTextForm: controllerTextForm,
+                          conformTextForm: conformTextForm,
+                          maxLength: maxLength,
+                        ),
                         SizedBox(height: 50),
                         isOnline
                             ? CustomButton.buttonStyle(
@@ -414,14 +242,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               setState(() {});
                             },
                             child: CustomText(
-                              text: loginPage == 0
-                                  ? ''.tr
-                                  : loginPage == 2
-                                      ? 'You did not receive the identification code? Send again later'
-                                          .tr +
-                                          '   $count   ' +
-                                          'second'.tr
-                                      : '',
+                              text: _getResendText(),
                               fontsize: 15,
                               fontWeight: FontWeight.w400,
                               color: Colors.brown[700],
@@ -460,5 +281,121 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildBackButton(VoidCallback onTap) {
+    return Positioned(
+      top: 40, // Adjust for the safe area
+      left: 16,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.5),
+                spreadRadius: 1,
+                blurRadius: 4,
+                offset: Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Icon(
+            Icons.arrow_back,
+            color: loginPage > 0 ? Colors.black : AppColors.backgroundColor,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.newa,
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(80),
+          bottomRight: Radius.circular(80),
+        ),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(23),
+                  color: Colors.white,
+                ),
+                child: IconButton(
+                  icon: const Icon(
+                    Icons.arrow_back,
+                    color: Colors.black,
+                    size: 28,
+                  ),
+                  onPressed: () => Navigator.of(context).pop(),
+                  alignment: Alignment.topRight,
+                ),
+              ),
+              Column(
+                children: [
+                  const SizedBox(height: 15),
+                  Center(
+                    // ...existing code...
+                  ),
+                ],
+              ),
+            ],
+          ),
+          Container(
+            width: Get.width * 0.26,
+            height: Get.height * 0.26,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              image: DecorationImage(
+                image: AssetImage('assets/images/splash.png'),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
+
+  String _getHeaderText() {
+    switch (loginPage) {
+      case 0:
+        return 'Enter your customer number'.tr;
+      case 1:
+        return 'Please enter your mobile phone number ending with'.tr +
+            '  ' +
+            customAddress +
+            '\n';
+      case 2:
+        return 'We have sent the identification number to your phone number, please enter the code'
+            .tr;
+      case 3:
+        return 'Please create your own 6-digit password'.tr;
+      case 4:
+        return 'Please confirm your 6-digit password'.tr;
+      default:
+        return '';
+    }
+  }
+
+  String _getResendText() {
+    if (loginPage == 0) {
+      return ''.tr;
+    } else if (loginPage == 2) {
+      return 'You did not receive the identification code? Send again later'.tr +
+          '   $count   ' +
+          'second'.tr;
+    }
+    return '';
   }
 }

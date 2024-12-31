@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../Home/View/loan_test.dart';
+import '../../Home/View/home.dart';
 import '../home.dart';
 import '../../register/login_screen.dart';
 import '../home_screen.dart';

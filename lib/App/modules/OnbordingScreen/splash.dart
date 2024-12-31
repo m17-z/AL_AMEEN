@@ -1,5 +1,5 @@
 import '../../helper/Colors2.dart';
-import '../Home/View/loan_test.dart';
+import '../Home/View/home.dart';
 import '../unused_filles/home.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
