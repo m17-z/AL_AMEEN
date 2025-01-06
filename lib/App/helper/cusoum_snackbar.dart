@@ -1,4 +1,3 @@
-
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -11,20 +10,23 @@ abstract class CustomSnackBar {
     required String message,
     ContentType? contentType,
   }) {
-    final snackBar = SnackBar(
-      elevation: 0,
-      behavior: SnackBarBehavior.floating,
-      backgroundColor: Colors.transparent,
-      content: AwesomeSnackbarContent(
-        title: title ?? '',
-        message: message,
-        contentType: contentType ?? ContentType.help,
-      ),
-    );
+    // Delayed execution to avoid calling ScaffoldMessenger during build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final snackBar = SnackBar(
+        elevation: 0,
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.transparent,
+        content: AwesomeSnackbarContent(
+          title: title ?? '',
+          message: message,
+          contentType: contentType ?? ContentType.help,
+        ),
+      );
 
-    ScaffoldMessenger.of(Get.overlayContext!)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(snackBar);
+      ScaffoldMessenger.of(Get.overlayContext!)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(snackBar);
+    });
   }
 
   static void error({

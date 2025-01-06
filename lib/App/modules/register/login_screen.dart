@@ -1,31 +1,30 @@
 import 'dart:async';
 import 'package:al_ameen/App/modules/register/formfields.dart';
-
 import '../Home/View/home.dart';
 import '../unused_filles/splash/auth_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:lottie/lottie.dart';
 import '../../data/api/data from user.dart' as dataFromUser;
 import '../../data/api/session.dart';
 import '../../helper/Colors2.dart';
 import '../../helper/cusoum_snackbar.dart';
 import '../../helper/custom_button.dart';
 import '../../helper/custom_text.dart';
-import '../../helper/custom_textformfield.dart';
-import '../../helper/custom_wave.dart';
+
 import '../OnbordingScreen/splash.dart';
-import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class LoginScreen extends StatefulWidget {
   final String? baseUrlGet;
-const LoginScreen({
+  const LoginScreen({
     Key? key,
     this.baseUrlGet,
   }) : super(key: key);
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
+
 class _LoginScreenState extends State<LoginScreen> {
   // Form key
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -61,6 +60,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   // Max length for phone number
   var maxLength = 10;
+
+  bool isLoading = false; // Add loading state
 
   @override
   void initState() {
@@ -121,171 +122,303 @@ class _LoginScreenState extends State<LoginScreen> {
         });
       } else {
         CustomSnackBar.warning(message: "Customer ID not found");
+        print("Customer ID not found");
       }
     } catch (e) {
       CustomSnackBar.error(message: e.toString());
+      print(e.toString());
     }
   }
 
   /// Handle Next button press
   Future<void> handleNext() async {
-    if (_formKey.currentState!.validate()) {
-      try {
-        if (loginPage == 0) {
-          // Step 1: Fetch customer details using the entered customer ID
-          await fetchCustomerDetails();
-        } else if (loginPage == 1) {
-          // Step 2: Start timer and move to next screen for the identification code
+  if (_formKey.currentState!.validate()) {
+    setState(() {
+      isLoading = true; // Show loading indicator
+    });
+
+    try {
+      await Future.delayed(Duration(seconds: 2)); // Simulate delay for loading
+
+      if (loginPage == 0) {
+        // Step 1: Fetch customer details using the entered customer ID
+        final response = await openSession(controller0.text.trim());
+        if (response != null && response['status'] == 1) {
+          final userDetails = response['userDetails'];
+          final authToken = userDetails['authToken'];
+          final customerId = userDetails['customerId'];
+          final firstName = userDetails['firstName']; // Extract first name
+          final lastName = userDetails['lastName'];   // Extract last name
+          setState(() {
+            loginPage = 1;
+            controller1.text = '';  // Clear mobile field so it's not editable
+            customAddress = userDetails['address'].substring(userDetails['address'].length - 3);  // Store the last 3 digits for display
+          });
+        } else {
+          CustomSnackBar.warning(message: "Customer ID not found");
+          print("Customer ID not found");
+        }
+      } else if (loginPage == 1) {
+        // Step 2: Start timer and move to next screen for the identification code
+        String phone = controller1.text.trim();
+        String customerId = controller0.text.trim();
+        final response = await fetchOtp(phone, customerId);  // Fetch OTP from API
+        if (response != null && response['status'] == 'success') {
           setState(() {
             loginPage = 2;
           });
-        } else if (loginPage == 2) {
-          // Step 3: Verification of identification code (integrate your logic here)
-          // Add your verification logic if needed, currently proceeding to next page
+        } else {
+          CustomSnackBar.error(message: 'Failed to send OTP');
+          print('Failed to send OTP');
+        }
+      } else if (loginPage == 2) {
+        // Step 3: Verify the OTP entered by the user
+        String customerId = controller0.text.trim();
+        String otp = pinCode.text.trim();
+        final response = await verifyOtp(customerId, otp);
+        if (response != null && response['status'] == 'success' && response['otp'] == otp) {
           setState(() {
-            loginPage = 3;
+            loginPage = 3;  // Proceed to password creation
           });
-        } else if (loginPage == 3) {
-          // Step 4: Logic to create a 6-digit password
-          // Make sure user is creating a valid password (you can add any additional password strength logic here)
+        } else {
+          CustomSnackBar.error(message: 'Failed to verify OTP');
+          print('Failed to verify OTP');
+        }
+      } else if (loginPage == 3) {
+        // Step 4: Create a 6-digit password
+        if (_formKey.currentState!.validate()) {
           setState(() {
             loginPage = 4;
           });
-        } else if (loginPage == 4) {
-          // Step 5: Confirm the entered password matches the confirmed password
-          if (controllerTextForm.join() == conformTextForm.join()) {
-            // If passwords match, proceed to the HomeScreen
-            Get.offAll(loanshome());
-          } else {
-            // If passwords don't match, show an error
-            Get.snackbar('Error', 'Passwords do not match');
-          }
+        } else {
+          CustomSnackBar.error(message: 'Please create a valid password');
+          print('Please create a valid password');
         }
-      } catch (e) {
-        // Handle error without changing the page
-        Get.snackbar('Error', e.toString());
+      } else if (loginPage == 4) {
+        // Step 5: Confirm the entered password matches the confirmed password
+        if (controllerTextForm.join() == conformTextForm.join()) {
+          // Step 6: Update the password
+          String customerId = controller0.text.trim();
+          String password = controllerTextForm.join();
+          final response = await updatePassword(customerId, password);
+          if (response != null && response['status'] == 'success') {
+            // If password update is successful, proceed to the HomeScreen
+            final openSessionResponse = await openSession(customerId);
+            final authToken = openSessionResponse['userDetails']['authToken'];
+            final firstName = openSessionResponse['userDetails']['firstName']; // Extract first name
+            final lastName = openSessionResponse['userDetails']['lastName']; 
+            final  mobileNo= openSessionResponse['userDetails']['mobileNo']; 
+            final address = openSessionResponse['userDetails']['address']; 
+
+            Get.offAll(() => loanshome(authToken: authToken, customerId: customerId, firstName: firstName, lastName: lastName, mobileNo: mobileNo, address: address,));
+          } else {
+            CustomSnackBar.error(message: 'Failed to update password');
+            print('Failed to update password');
+          }
+        } else {
+          Get.snackbar('Error', 'Passwords do not match');
+          print('Passwords do not match');
+        }
       }
+    } catch (e) {
+      // Handle error without changing the page
+      Get.snackbar('Error', e.toString());
+      print(e.toString());
+    } finally {
+      setState(() {
+        isLoading = false; // Hide loading indicator
+      });
     }
   }
+}
+
+
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async => canPop,
       child: Scaffold(
-        backgroundColor: Colors.white,
-        body: Form(
-          key: _formKey,
-          child: Align(
-            alignment: Alignment.center,
-            child: Container(
-              width: Get.width,
-              height: Get.height,
-              child: SingleChildScrollView(
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    // Custom Waves Decoration
-                   
-                    if (loginPage > 0)
-                      _buildBackButton(() {
-                        setState(() {
-                          loginPage--;
-                        });
-                      })
-                    else
-                      _buildBackButton(() {
-                        Get.offAll(OnboardingScreen2());
-                      }),
-                    Column(
-                      
-                      children: [
-                        _buildHeader(),
-                        const SizedBox(height: 20),
-                        CustomText(
-                          padding: EdgeInsets.symmetric(horizontal: 12),
-                          text: _getHeaderText(),
-                          fontsize: 15,
-                          fontWeight: FontWeight.w500,
-                          height: 1.8,
-                        ),
-                        SizedBox(height: 20),
-                        FormFields.build(
-                          loginPage: loginPage,
-                          context: context,
-                          formKey: _formKey,
-                          controller0: controller0,
-                          controller1: controller1,
-                          controller2: controller2,
-                          controllers: _controllers,
-                          conform: _conform,
-                          focusNodes: _focusNodes,
-                          setState: setState,
-                          controllerTextForm: controllerTextForm,
-                          conformTextForm: conformTextForm,
-                          maxLength: maxLength,
-                        ),
-                        SizedBox(height: 50),
-                        isOnline
-                            ? CustomButton.buttonStyle(
-                                text: "Next".tr,
-                                width: Get.width * 0.4,
-                                height: Get.height * 0.08,
-                                onPressed: handleNext,
-                              )
-                            : Lottie.asset('assets/lottie/offline.json',
-                                width: 100, height: 100),
-                        SizedBox(height: 10),
-                        if (loginPage == 0 || loginPage == 2)
-                          TextButton(
-                            onPressed: () {
-                              setState(() {});
-                            },
-                            child: CustomText(
-                              text: _getResendText(),
-                              fontsize: 15,
-                              fontWeight: FontWeight.w400,
-                              color: Colors.brown[700],
-                            ),
-                          ),
-                        SizedBox(height: 10),
-                        if (count == 0 && loginPage == 2)
-                          InkWell(
-                            onTap: () {
-                              setState(() {
-                                // Resend the identification code here
-                                // Integrate your resend API call
-                              });
-                            },
-                            child: Container(
-                              width: Get.width * 0.3,
-                              height: Get.height * 0.08,
-                              padding: EdgeInsets.symmetric(horizontal: 5),
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(23),
-                                  border: Border.all(
-                                      width: 2, color: Colors.blue.shade800)),
-                              child: FittedBox(
-                                  child: CustomText(text: 'Resend'.tr)),
-                            ),
-                          ),
-                        SizedBox(height: 50),
-                      ],
-                    ),
-                  ],
+        backgroundColor:  Color(0xFFEBEBEB),
+        body: Stack(
+          alignment: Alignment.center, // Center the stack's children
+          children: [
+            // Background Container
+            Positioned(
+              top: 0,
+              child: Container(
+                height: Get.height * 0.5,
+                width: Get.width,
+                decoration: BoxDecoration(
+                  color: AppColors.newa,
+                ),
+                child: SafeArea(
+                  bottom: false,
+                  child: _buildHeader(),
                 ),
               ),
             ),
-          ),
+
+            // Positioned Card
+            Positioned(
+              top: 150,
+              left: 0,
+              right: 0,
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: _buildCard(context),
+              ),
+            ),
+
+            // Loading Indicator
+            if (isLoading)
+              Center(
+                child: CircularProgressIndicator(),
+              ),
+
+            // Back Button
+            if (loginPage > 0)
+              _buildBackButton(() {
+                setState(() {
+                  loginPage--;
+                });
+              })
+            else
+              _buildBackButton(() {
+                Get.offAll(OnboardingScreen2());
+              }),
+
+            // Interactable Area in Lower Page
+            Positioned(
+              bottom: 20, // Adjust as needed
+              left: 0,
+              right: 0,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                // ...existing code...
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
+  Widget _buildCard(BuildContext context) {
+    return Form( // Wrap the card with Form widget
+      key: _formKey,
+      child: Container(
+        width: Get.width * 0.95,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(50),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.3),
+              spreadRadius: 2,
+              blurRadius: 7,
+              offset: Offset(0, 3),
+            ),
+          ],
+        ),
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          transitionBuilder: (Widget child, Animation<double> animation) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+          child: _buildCardContent(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCardContent() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        CustomText(
+          padding: EdgeInsets.symmetric(horizontal: 12),
+          text: _getHeaderText(),
+          fontsize: 15,
+          fontWeight: FontWeight.w500,
+          height: 1.8,
+        ),
+        SizedBox(height: 20),
+        FormFields.build(
+          loginPage: loginPage,
+          context: context,
+          formKey: _formKey,
+          controller0: controller0,
+          controller1: controller1,
+          controller2: controller2,
+          controllers: _controllers,
+          conform: _conform,
+          focusNodes: _focusNodes,
+          pinCode: pinCode,
+          setState: setState,
+          controllerTextForm: controllerTextForm,
+          conformTextForm: conformTextForm,
+          maxLength: maxLength,
+        ),
+        SizedBox(height: 25),
+        Stack(
+          alignment: Alignment.center,
+          children: [
+            CustomButton.buttonStyle(
+              text: "Next".tr,
+              width: Get.width * 0.4,
+              height: Get.height * 0.08,
+              onPressed: isLoading ? null : handleNext, // Disable button when loading
+            ),
+            if (isLoading)
+              Container(
+                width: Get.width * 0.4,
+                height: Get.height * 0.08,
+                color: Colors.black.withOpacity(0.5), // Semi-transparent overlay
+              ),
+          ],
+        ),
+        SizedBox(height: 10),
+        if (loginPage == 0 || loginPage == 2)
+          TextButton(
+            onPressed: () {
+              setState(() {});
+            },
+            child: CustomText(
+              text: _getResendText(),
+              fontsize: 15,
+              fontWeight: FontWeight.w400,
+              color: Colors.brown[700],
+            ),
+          ),
+        SizedBox(height: 10),
+        if (count == 0 && loginPage == 2)
+          InkWell(
+            onTap: () {
+              setState(() {
+                
+              });
+            },
+            child: Container(
+              width: Get.width * 0.3,
+              height: Get.height * 0.08,
+              padding: EdgeInsets.symmetric(horizontal: 5),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(23),
+                  border: Border.all(width: 2, color: Colors.blue.shade800)),
+              child: FittedBox(child: CustomText(text: 'Resend'.tr)),
+            ),
+          ),
+        SizedBox(height: 50),
+      ],
+    );
+  }
+
   Widget _buildBackButton(VoidCallback onTap) {
     return Positioned(
-      top: 40, // Adjust for the safe area
+      top: 40,
       left: 16,
       child: GestureDetector(
         onTap: onTap,
@@ -305,7 +438,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           child: Icon(
             Icons.arrow_back,
-            color: loginPage > 0 ? Colors.black : AppColors.backgroundColor,
+            color: loginPage > 0 ? Colors.black : AppColors.textColor,
           ),
         ),
       ),
@@ -315,13 +448,6 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.newa,
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(80),
-          bottomRight: Radius.circular(80),
-        ),
-      ),
       child: Column(
         children: [
           Row(
@@ -331,35 +457,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   borderRadius: BorderRadius.circular(23),
                   color: Colors.white,
                 ),
-                child: IconButton(
-                  icon: const Icon(
-                    Icons.arrow_back,
-                    color: Colors.black,
-                    size: 28,
-                  ),
-                  onPressed: () => Navigator.of(context).pop(),
-                  alignment: Alignment.topRight,
-                ),
-              ),
-              Column(
-                children: [
-                  const SizedBox(height: 15),
-                  Center(
-                    // ...existing code...
-                  ),
-                ],
               ),
             ],
-          ),
-          Container(
-            width: Get.width * 0.26,
-            height: Get.height * 0.26,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              image: DecorationImage(
-                image: AssetImage('assets/images/splash.png'),
-              ),
-            ),
           ),
           const SizedBox(height: 20),
         ],

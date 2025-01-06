@@ -34,3 +34,11 @@
 *.swp
 *.swo
 *.DS_Store
+
+# Flutter/Dart/Pub related
+.dart_tool/
+.packages
+.pub-cache/
+build/
+/build/
+*.apk

@@ -427,7 +427,7 @@ class Languages extends Translations {
   "Loan Status" : "حالة القرض",
   "Loan Start Date" : "تاريخ بدء القرض",
   "Amount Borrowed"  : "المبلغ المقترض",
-  
+  'Proceed' : 'متابعة',
         },
       };
 }

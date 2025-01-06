@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../data/api/constance.dart';
 import 'branches_screen.dart';
 import 'company_details_screen.dart';
@@ -13,7 +12,23 @@ import '../../lang/language_view_model.dart';
 
 class CustomDrawer extends StatefulWidget {
   final VoidCallback? onLogout;
-  const CustomDrawer({Key? key, this.onLogout, required Color color}) : super(key: key);
+  final Color color;
+  final String customerId;
+  final String firstName;
+  final String lastName;
+  final String mobileNo;
+  final String address;
+
+  const CustomDrawer({
+    Key? key,
+    this.onLogout,
+    required this.color,
+    required this.customerId,
+    required this.firstName,
+    required this.lastName,
+    required this.mobileNo,
+    required this.address,
+  }) : super(key: key);
 
   @override
   State<CustomDrawer> createState() => _CustomDrawerState();
@@ -26,65 +41,48 @@ class _CustomDrawerState extends State<CustomDrawer> {
   @override
   void initState() {
     super.initState();
+    print('customerId: ${widget.customerId}');
+    print('firstName: ${widget.firstName}');
+    print('lastName: ${widget.lastName}');
+    print('mobileNo: ${widget.mobileNo}');
+    print('address: ${widget.address}');
     lang = Get.locale == Locale('ar') ? 'English' : 'عربي';
   }
 
-  
-
   Future<void> handleProfileTap() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final firstName = prefs.getString('firstName') ?? '';
-    final lastName = prefs.getString('lastName') ?? '';
-    final mobileNo = prefs.getString('mobileNo') ?? '';
-    final address = prefs.getString('address') ?? '';
-    final customerId = prefs.getString('customerId') ?? '';
-
-    if (firstName.isEmpty && lastName.isEmpty && mobileNo.isEmpty && address.isEmpty && customerId.isEmpty) {
+    print('Profile tapped');
+    if (widget.customerId.isEmpty) {
       Get.snackbar(
         'Guest Mode',
         'You are in guest mode. Please log in.',
         snackPosition: SnackPosition.TOP,
-
         backgroundColor: Colors.white.withOpacity(0.7),
         colorText: Colors.black,
       );
     } else {
-      Get.to(ProfilePage());
+      Get.to(ProfilePage(
+        customerId: widget.customerId,
+        firstName: widget.firstName,
+        lastName: widget.lastName,
+        mobileNo: widget.mobileNo,
+        address: widget.address,
+      ));
     }
   }
-Future<void> handlesittingtap() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final firstName = prefs.getString('firstName') ?? '';
-    final lastName = prefs.getString('lastName') ?? '';
-    final mobileNo = prefs.getString('mobileNo') ?? '';
-    final address = prefs.getString('address') ?? '';
-    final customerId = prefs.getString('customerId') ?? '';
 
-    if (firstName.isEmpty && lastName.isEmpty && mobileNo.isEmpty && address.isEmpty && customerId.isEmpty) {
+  Future<void> handleSettingsTap() async {
+    print('Settings tapped');
+    if (isGuest) {
       Get.snackbar(
         'Guest Mode',
         'You are in guest mode. Please log in.',
         snackPosition: SnackPosition.TOP,
-      backgroundColor: Colors.white.withOpacity(0.7),
+        backgroundColor: Colors.white.withOpacity(0.7),
         colorText: Colors.black,
-
       );
     } else {
       Get.to(SettingsScreen());
     }
-  }
-  void _toggleLanguage() {
-    setState(() {
-      if (Get.locale == Locale('ar')) {
-        Get.find<LanguageController>().saveLanguage(AppLanguage.English);
-        Get.updateLocale(const Locale('en', 'us'));
-        lang = 'عربي';
-      } else {
-        Get.find<LanguageController>().saveLanguage(AppLanguage.Arabic);
-        Get.updateLocale(const Locale('ar'));
-        lang = 'English';
-      }
-    });
   }
 
   @override
@@ -108,16 +106,16 @@ Future<void> handlesittingtap() async {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                       Expanded(
-                          child: Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            image: DecorationImage(
-                              image: AssetImage("assets/images/splash.png"),
-                            ),
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          image: DecorationImage(
+                            image: AssetImage("assets/images/splash.png"),
                           ),
                         ),
-                       ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -145,7 +143,7 @@ Future<void> handlesittingtap() async {
             _buildDrawerItem(
               title: 'Settings'.tr,
               icon: Icons.settings,
-              onTap: handlesittingtap,
+              onTap: handleSettingsTap,
             ),
             _buildDrawerItem(
               title: 'Logout'.tr,
@@ -154,8 +152,7 @@ Future<void> handlesittingtap() async {
             ),
             const SizedBox(height: 10),
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 50, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 10),
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   border: Border.all(width: 1, color: Constants.fontColor),
@@ -184,18 +181,38 @@ Future<void> handlesittingtap() async {
     required IconData icon,
     required VoidCallback onTap,
   }) {
-    return Column(
-      children: [
-        ListTile(
-          onTap: onTap,
-          leading: CustomText(
-            text: title,
-            fontsize: 14,
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        print('Tapped on: $title');
+        onTap();
+      },
+      child: Column(
+        children: [
+          ListTile(
+            leading: Icon(icon, size: 21),
+            title: CustomText(
+              text: title,
+              fontsize: 14,
+            ),
           ),
-          trailing: Icon(icon, size: 21),
-        ),
-        const Divider(height: 1, color: Colors.grey),
-      ],
+          const Divider(height: 1, color: Colors.grey),
+        ],
+      ),
     );
+  }
+
+  void _toggleLanguage() {
+    setState(() {
+      if (Get.locale == Locale('ar')) {
+        Get.find<LanguageController>().saveLanguage(AppLanguage.English);
+        Get.updateLocale(const Locale('en', 'us'));
+        lang = 'عربي';
+      } else {
+        Get.find<LanguageController>().saveLanguage(AppLanguage.Arabic);
+        Get.updateLocale(const Locale('ar'));
+        lang = 'English';
+      }
+    });
   }
 }

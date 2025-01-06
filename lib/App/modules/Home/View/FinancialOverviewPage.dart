@@ -4,13 +4,22 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart'; // Add this import
 
+
+import '../../../data/api/session.dart';
 import '../../../helper/CustomLoanCard.dart';
+import '../../../helper/cusoum_snackbar.dart';
 import '../../Payment/payment_screen.dart';
-
+import '../../../data/api/storage_helper.dart'; // Add this import
 
 
 class FinancialOverviewPage extends StatefulWidget {
+  final String customerId;    // Added parameter
+  final String authToken;     // Added parameter
+
+  FinancialOverviewPage({required this.customerId, required this.authToken});  // Modified constructor
+
   @override
   _FinancialOverviewPageState createState() => _FinancialOverviewPageState();
 }
@@ -30,7 +39,6 @@ class _FinancialOverviewPageState extends State<FinancialOverviewPage> {
   String _loanType = '';
   String _loanStatus = '';
   String _interestRate = '';
-
   @override
   void initState() {
     super.initState();
@@ -38,45 +46,26 @@ class _FinancialOverviewPageState extends State<FinancialOverviewPage> {
   }
 
   Future<void> fetchLoanDetails() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final storedCustomerId = prefs.getString('customerId');
-    final storedAuthToken = prefs.getString('authToken');
+    try {
+      final loanData = await currentLoan(widget.customerId, widget.authToken); // Retrieve loan data from API
 
-    if (storedCustomerId == null || storedAuthToken == null) {
-      throw Exception('Customer ID or Auth Token not found');
-    }
-
-    final url = Uri.parse("http://192.168.0.45:7005/RestfulApp/resources/generatetoken/CurrentLoan");
-
-    final response = await http.post(url,
-      headers: {'Content-Type': 'application/json; charset=UTF-8'},
-      body: json.encode({'customerId': storedCustomerId, 'authToken': storedAuthToken}),
-    );
-
-    if (response.statusCode == 200) {
-      final responseBody = utf8.decode(response.bodyBytes); // Ensure correct decoding to UTF-8
-      final responseData = json.decode(responseBody);
-
-      if (responseData['status'] == 1) {
-        final loan = responseData['loanList'][0];
+      if (loanData != null && loanData['status'] == 1) {
+        final loan = loanData['loanList'][0];
         final totalAmount = double.parse(loan['loanAmount']);
         final paidAmount = loan['loanStatement']
             .map((installment) => double.parse(installment['paidAmount']))
-            .reduce((a, b) => a + b);
+            .fold(0.0, (sum, amount) => sum + amount);
         final remainingAmount = totalAmount - paidAmount;
         final paidPercentage = (paidAmount / totalAmount) * 100;
         final remainingPercentage = 100 - paidPercentage;
 
-        // Store the current loan data in SharedPreferences
-        await prefs.setString('currentLoan', json.encode(loan));
-
-        // Update the UI with the calculated values
         setState(() {
           _paidAmount = '\$${paidAmount.toStringAsFixed(2)}';
           _remainingAmount = '\$${remainingAmount.toStringAsFixed(2)}';
           _paidPercentage = '${paidPercentage.toStringAsFixed(1)}%';
           _remainingPercentage = '${remainingPercentage.toStringAsFixed(1)}%';
-          _installments = List<Map<String, dynamic>>.from(loan['loanStatement'].map((item) => Map<String, dynamic>.from(item)));
+          _installments = List<Map<String, dynamic>>.from(
+              loan['loanStatement'].map((item) => Map<String, dynamic>.from(item)));
           _filteredInstallments = _installments;
           _availableDates = _installments.map((inst) => inst['installmentDate'] as String).toSet().toList();
           _loanDetails = loan;
@@ -86,7 +75,6 @@ class _FinancialOverviewPageState extends State<FinancialOverviewPage> {
           _interestRate = loan['interestRate'];
         });
       } else {
-        // Handle the case where the response status is not success
         setState(() {
           _paidAmount = '\$00.00';
           _remainingAmount = '\$00.00';
@@ -101,26 +89,27 @@ class _FinancialOverviewPageState extends State<FinancialOverviewPage> {
           _loanStatus = '00';
           _interestRate = '00';
         });
-        print('Failed to fetch loan details');
+        print('Failed to fetch loan details from API');
       }
-    } else {
-      // Handle the case where the API call fails
-      print('Failed to fetch loan details from API');
+    } catch (e) {
+      print('Error fetching loan details from API: $e');
+      CustomSnackBar.error(message: "Failed to fetch loan details");
     }
   }
 
   void _searchInstallmentByDate(String date) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final storedLoan = prefs.getString('currentLoan');
-    if (storedLoan != null) {
-      final loan = json.decode(storedLoan);
-      final installments = loan['loanStatement'].where(
-        (inst) => inst['installmentDate'] == date,
-      ).map((item) => Map<String, dynamic>.from(item)).toList();
-      setState(() {
-        _filteredInstallments = List<Map<String, dynamic>>.from(installments);
-      });
+    if (!_availableDates.contains(date)) { // Validate selected date
+      CustomSnackBar.error(message: "Selected date is not available");
+      return;
     }
+    // Remove fetching from StorageHelper and use _installments directly
+    final installments = _installments.where(
+      (inst) => inst['installmentDate'] == date,
+    ).toList();
+    print('Filtered Installments for $date: $installments'); // Debugging line
+    setState(() {
+      _filteredInstallments = installments;
+    });
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -141,8 +130,9 @@ class _FinancialOverviewPageState extends State<FinancialOverviewPage> {
       },
     );
     if (picked != null) {
-      _dateController.text = picked;
-      _searchInstallmentByDate(picked);
+      String formattedDate = picked; // Use the picked string directly
+      _dateController.text = formattedDate;
+      _searchInstallmentByDate(formattedDate);
     }
   }
 
@@ -236,7 +226,7 @@ class _FinancialOverviewPageState extends State<FinancialOverviewPage> {
             ),
           ),
           // Transactions List
-           Expanded(
+  Expanded(
   child: Container(
     decoration: BoxDecoration(
       color: AppColors.backgroundColor,
@@ -249,46 +239,44 @@ class _FinancialOverviewPageState extends State<FinancialOverviewPage> {
         children: [
           // Check if there are filtered installments
           if (_filteredInstallments.isNotEmpty) ...[
-            CustomLoanCard(
-              loanId: _loanId,
-              loanType: _loanType,
-              loanAmount: _filteredInstallments[0]['installmentAmount']
-                  .toString(),
-              loanStatus: _loanStatus,
-              loanStartDate: _filteredInstallments[0]['installmentDate'],
-              interestRate: _interestRate,
-              isArabic: false,
-              installmentNo: _filteredInstallments[0]['installmentNo']
-                  .toString(),
-              paidAmount: _filteredInstallments[0]['paidAmount'].toString(),
-              installmentStatus: _filteredInstallments[0]['installmentStatus']
-                  .toString(),
-            ),
+            // Iterate over all filtered installments
+            ..._filteredInstallments.map((installment) => 
+              CustomLoanCard(
+                loanId: _loanId,
+                loanType: _loanType,
+                loanAmount: installment['installmentAmount'].toString(),
+                loanStatus: _loanStatus,
+                loanStartDate: installment['installmentDate'], // Use installmentDate from API
+                interestRate: _interestRate,
+                isArabic: false,
+                installmentNo: installment['installmentNo'].toString(),
+                paidAmount: installment['paidAmount'].toString(),
+                installmentStatus: installment['installmentStatus'].toString(),
+              )
+            ).toList(),
             Center(
               child: ElevatedButton(
-              onPressed: () {
-                // Navigate to the payment screen
-                Get.to(PaymentScreen());
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.newa, // Button color
-                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30),
+                onPressed: () {
+                  // Navigate to the payment screen
+                  Get.to(PaymentScreen());
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.newa, // Button color
+                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
                 ),
-              ),
-              child: Text(
-                'Pay Now'.tr,
-                style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+                child: Text(
+                  'Pay Now'.tr,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
-              ),
               ),
             ),
-             
-            
           ] else
             Center(
               child: Text(
@@ -300,8 +288,8 @@ class _FinancialOverviewPageState extends State<FinancialOverviewPage> {
       ),
     ),
   ),
-  
 )
+
 
         ],
       ),

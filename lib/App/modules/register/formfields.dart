@@ -2,7 +2,6 @@ import 'package:al_ameen/App/helper/custom_textformfield.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-
 class FormFields {
   static Widget build({
     required int loginPage,
@@ -18,6 +17,7 @@ class FormFields {
     required List<String> controllerTextForm,
     required List<String> conformTextForm,
     required int maxLength,
+    required TextEditingController pinCode, // Add pinCode controller
   }) {
     if (loginPage == 0) {
       return _buildCustomerNumberField(controller0);
@@ -28,7 +28,7 @@ class FormFields {
         setState,
       );
     } else if (loginPage == 2) {
-      return _buildIdentificationField(controller2);
+      return _buildIdentificationField(pinCode); // Use pinCode controller
     } else if (loginPage == 3 || loginPage == 4) {
       return _buildPasswordField(
         context,

@@ -368,7 +368,7 @@ void _toggleLanguage() {
                   Spacer(),
                   TextButton(
                     onPressed: () async {
-                        Get.to(loanshome()) ;
+                        Get.to(loanshome(customerId: '', authToken: '', firstName: '', lastName: '', mobileNo: '', address: '',)) ;
                     },
                     style: TextButton.styleFrom(
                       shape: RoundedRectangleBorder(

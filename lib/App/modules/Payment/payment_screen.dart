@@ -74,19 +74,17 @@ class _PaymentScreenState extends State<PaymentScreen> {
   @override
   Widget build(BuildContext context) {
 
-    return PopScope(
-      canPop: canPop,
-      onPopInvoked: (didPop) {
-        setState(() {
-          if (payment > 0) {
-            payment--;
-          } else {
-            payment = 0;
-            canPop = true;
-                        Get.offAll(loanshome());
-            //  didPop = canPop;
-          }
-        });
+    return WillPopScope(
+      onWillPop: () async {
+      setState(() {
+        if (payment > 0) {
+        payment--;
+        } else {
+        payment = 0;
+        canPop = true;
+        }
+      });
+      return Future.value(canPop);
       },
       child: Scaffold(
         body: Form(

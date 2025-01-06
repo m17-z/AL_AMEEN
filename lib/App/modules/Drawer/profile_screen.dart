@@ -8,6 +8,20 @@ import '../../helper/custom_wave.dart';
 import '../../helper/custom_waves.dart';
 
 class ProfilePage extends StatefulWidget {
+  final String customerId;
+  final String firstName;
+  final String lastName;
+  final String mobileNo;
+  final String address;
+
+  ProfilePage({
+    required this.customerId,
+    required this.firstName,
+    required this.lastName,
+    required this.mobileNo,
+    required this.address,
+  });
+
   @override
   _ProfilePageState createState() => _ProfilePageState();
 }
@@ -24,26 +38,11 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
-    loadProfileData();
-  }
-
-  Future<void> loadProfileData() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final firstName = prefs.getString('firstName') ?? '';
-    final lastName = prefs.getString('lastName') ?? '';
-    final mobileNo = prefs.getString('mobileNo') ?? '';
-    final address = prefs.getString('address') ?? '';
-    final customerId = prefs.getString('customerId') ?? '';
-
-    setState(() {
-   
-        nameController.text = '$firstName $lastName';
-        mobileController.text = mobileNo;
-        addressController.text = address;
-        coustomerid.text = customerId;
-        isGuest = false;
-      
-    });
+    // Initialize controllers with passed data
+    nameController.text = '${widget.firstName} ${widget.lastName}';
+    mobileController.text = widget.mobileNo;
+    coustomerid.text = widget.customerId;
+    addressController.text = widget.address;
   }
 
   Future<void> _pickImage(ImageSource source) async {
@@ -105,7 +104,9 @@ class _ProfilePageState extends State<ProfilePage> {
                     onTap: () => _showImagePickerOptions(context),
                     child: CircleAvatar(
                       radius: 50,
-                      backgroundImage: AssetImage('assets/images/splash.png'),
+                      backgroundImage: _image != null
+                          ? FileImage(File(_image!.path))
+                          : AssetImage('assets/images/splash.png') as ImageProvider,
                       backgroundColor: Colors.white,
                       child: Stack(
                         children: [
@@ -139,7 +140,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         SizedBox(height: 20),
                         buildTextField("Mobile Number".tr, mobileController, Icons.phone),
                         SizedBox(height:20  ),
-                        buildTextField("coustomer ID ".tr, coustomerid, Icons.numbers),
+                        buildTextField("Customer ID".tr, coustomerid, Icons.numbers),
                             SizedBox(height:20  ),
                         buildTextField("Address".tr, addressController, Icons.home),
                         SizedBox(height: 30),

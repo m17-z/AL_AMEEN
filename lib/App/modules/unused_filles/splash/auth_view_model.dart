@@ -41,7 +41,7 @@ class AuthViewModel extends GetxController {
             await prefs?.setString('urlImage', userModel!.login!.urlImage.toString());
           // حفظ حالة تسجيل الدخول
             await Preferences.saveUserLoggedIn(true);
-                        Get.offAll((loanshome()));
+                        Get.offAll((loanshome(authToken: '', customerId: '', firstName: '', lastName: '', mobileNo: '', address: '',)));
           } else {
             Get.snackbar("Failure", userModel!.message ?? "An error occurred during login.");
           }
@@ -50,7 +50,7 @@ class AuthViewModel extends GetxController {
         else if (responseData is bool) {
           if (responseData == true) {
             Get.snackbar("Success", "Login Successful");
-                        Get.offAll(loanshome());
+                        Get.offAll((loanshome(authToken: '', customerId: '', firstName: '', lastName: '', mobileNo: '', address: '',)));
           } else {
             Get.snackbar("Failure", "Login failed");
           }
